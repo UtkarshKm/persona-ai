@@ -176,7 +176,7 @@ export default function ChatWindow() {
                   maxWidth: '70%',
                   padding: '15px 20px',
                   borderRadius: message.role === 'user' ? '20px 20px 5px 20px' : '20px 20px 20px 5px',
-                  backgroundColor: message.role === 'user' 
+                  background: message.role === 'user' 
                     ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
                     : 'white',
                   color: message.role === 'user' ? 'white' : '#1f2937',
