@@ -1,9 +1,21 @@
-import ChatWindow from "@/components/ChatWindow"
+import Hero from '@/components/landing/Hero';
+import PersonaShowcase from '@/components/landing/PersonaShowcase';
+import About from '@/components/landing/About';
+import Features from '@/components/landing/Features';
+import HowItWorks from '@/components/landing/HowItWorks';
+import FinalCTA from '@/components/landing/FinalCTA';
+import Footer from '@/components/layout/Footer'; // Import the new Footer component
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <ChatWindow />
-    </div>
-  )
+    <main>
+      <Hero />
+      <PersonaShowcase />
+      <About />
+      <Features />
+      <HowItWorks />
+      <FinalCTA />
+      <Footer /> {/* Add the Footer component */}
+    </main>
+  );
 }

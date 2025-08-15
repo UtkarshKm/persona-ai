@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Send, Loader2 } from "lucide-react"
+import { Send, Loader2, Copy, Check, ArrowDown } from "lucide-react"
 import PersonaSwitch from "./PersonaSwitch"
+import ThemeToggle from "@/components/ThemeToggle"
 import { cn } from "@/lib/utils"
 import { Persona } from "@/lib/prompts"
 import type { ModelMessage } from 'ai'
@@ -31,14 +32,17 @@ const personas = {
   },
 }
 
-export default function ChatWindow() {
+export default function ChatWindow({ initialPersona }: { initialPersona: Persona }) {
   const [messages, setMessages] = useState<ModelMessage[]>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
-  const [persona, setPersona] = useState<Persona>("hitesh")
+  const [persona, setPersona] = useState<Persona>(initialPersona)
   const [isTyping, setIsTyping] = useState(false)
+  const [copiedMessageId, setCopiedMessageId] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const chatMessagesRef = useRef<HTMLDivElement>(null); // New ref for scrollable div
   const inputRef = useRef<HTMLInputElement>(null)
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false); // New state
 
   const currentPersona = personas[persona]
 
@@ -56,6 +60,18 @@ export default function ChatWindow() {
     setMessages([]) // Clear previous chat
     setInput('') // Clear input
   }
+
+  const handleScroll = () => {
+    if (chatMessagesRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = chatMessagesRef.current;
+      // Show button if not at the very bottom (with a small threshold)
+      setShowScrollToBottom(scrollHeight - scrollTop > clientHeight + 100);
+    }
+  };
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return
@@ -128,7 +144,7 @@ export default function ChatWindow() {
     <div
       className={cn("min-h-screen bg-gradient-to-br transition-all duration-700 ease-out", currentPersona.bgGradient)}
     >
-      <div className="container mx-auto max-w-4xl h-screen flex flex-col">
+      <div className="container mx-auto max-w-5xl h-screen flex flex-col">
         {/* Header */}
         <Card className="m-4 p-4 shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm animate-in slide-in-from-top-4 duration-500">
           <div className="flex items-center justify-between">
@@ -143,12 +159,13 @@ export default function ChatWindow() {
                 </AvatarFallback>
               </Avatar>
               <div className="animate-in slide-in-from-left-2 duration-500 delay-100">
-                <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Persona Chat</h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Chatting with {currentPersona.name}</p>
+                <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Persona Chat</h1>
+                <p className="text-base text-slate-600 dark:text-slate-400">Chatting with <span className="font-semibold">{currentPersona.name}</span></p>
               </div>
             </div>
-            <div className="animate-in slide-in-from-right-2 duration-500 delay-200">
+            <div className="flex items-center gap-2 animate-in slide-in-from-right-2 duration-500 delay-200">
               <PersonaSwitch persona={persona} onPersonaChange={handlePersonaChange} />
+              <ThemeToggle /> {/* Added ThemeToggle */}
             </div>
           </div>
         </Card>
@@ -156,7 +173,11 @@ export default function ChatWindow() {
         {/* Chat Messages */}
         <Card className="flex-1 mx-4 mb-4 p-4 shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500 delay-100">
           <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+            <div
+              className="flex-1 overflow-y-auto space-y-4 pr-2 pl-2 pt-4 hide-scrollbar" // Added hide-scrollbar class
+              ref={chatMessagesRef} // Add a ref to the scrollable div
+              onScroll={handleScroll} // Add scroll event listener
+            >
               {messages.length === 0 && (
                 <div className="flex items-center justify-center h-full text-center animate-in fade-in duration-700 delay-300">
                   <div className="space-y-4">
@@ -183,7 +204,7 @@ export default function ChatWindow() {
                 <div
                   key={index}
                   className={cn(
-                    "flex gap-3 animate-in slide-in-from-bottom-2 duration-500 ease-out",
+                    "flex gap-4 animate-in slide-in-from-bottom-2 duration-500 ease-out",
                     message.role === "user" ? "justify-end" : "justify-start",
                   )}
                   style={{ animationDelay: `${index * 100}ms` }}
@@ -202,15 +223,32 @@ export default function ChatWindow() {
 
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] transform-gpu",
+                      "max-w-[70%] rounded-2xl px-4 py-3 shadow-md transition-all duration-200 hover:shadow-lg transform-gpu relative group", // Added relative group for icon positioning
                       message.role === "user"
-                        ? "bg-slate-700 text-white dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-500"
-                        : cn(currentPersona.messageColor, "hover:opacity-90"),
+                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white dark:from-blue-700 dark:to-blue-800 hover:from-blue-700 hover:to-blue-800"
+                        : cn(currentPersona.messageColor, "hover:opacity-90 border border-transparent"),
                     )}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">
                       {renderContent(message.content)}
                     </p>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(renderContent(message.content));
+                        setCopiedMessageId(index); // Set the ID of the copied message
+                        setTimeout(() => {
+                          setCopiedMessageId(null); // Reset after a delay
+                        }, 1500);
+                      }}
+                      className="absolute top-1 right-1 p-1 rounded-full bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      title="Copy to clipboard"
+                    >
+                      {copiedMessageId === index ? (
+                        <Check className="h-3 w-3" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </button>
                   </div>
 
                   {message.role === "user" && (
@@ -276,7 +314,7 @@ export default function ChatWindow() {
               placeholder={`Message ${currentPersona.name}...`}
               disabled={loading}
               className={cn(
-                "flex-1 border-slate-200 dark:border-slate-600 transition-all duration-200 focus:scale-[1.01] transform-gpu",
+                "flex-1 border-slate-300 dark:border-slate-700 transition-all duration-200 focus:scale-[1.01] transform-gpu focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900", // Enhanced border and focus ring
                 persona === "hitesh" 
                   ? "focus:ring-blue-500 focus:border-blue-500" 
                   : "focus:ring-green-500 focus:border-green-500"
@@ -291,17 +329,27 @@ export default function ChatWindow() {
                 persona === "hitesh"
                   ? "hover:bg-blue-600 focus:ring-blue-500"
                   : "hover:bg-green-600 focus:ring-green-500",
+                "group" // Add group for icon animation
               )}
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Send className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <Send className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-active:translate-x-0" /> // Enhanced icon animation
               )}
             </Button>
           </div>
         </Card>
       </div>
+      {showScrollToBottom && (
+        <Button
+          onClick={scrollToBottom}
+          className="absolute bottom-24 right-8 p-2 rounded-full shadow-lg bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300 animate-bounce"
+          size="icon"
+        >
+          <ArrowDown className="h-5 w-5" />
+        </Button>
+      )}
     </div>
   )
 }
