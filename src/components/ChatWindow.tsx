@@ -31,11 +31,11 @@ const personas = {
   },
 }
 
-export default function ChatWindow() {
+export default function ChatWindow({ initialPersona }: { initialPersona: Persona }) {
   const [messages, setMessages] = useState<ModelMessage[]>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
-  const [persona, setPersona] = useState<Persona>("hitesh")
+  const [persona, setPersona] = useState<Persona>(initialPersona)
   const [isTyping, setIsTyping] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
