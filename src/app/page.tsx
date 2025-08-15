@@ -4,6 +4,7 @@ import About from '@/components/landing/About';
 import Features from '@/components/landing/Features';
 import HowItWorks from '@/components/landing/HowItWorks';
 import FinalCTA from '@/components/landing/FinalCTA';
+import Footer from '@/components/layout/Footer'; // Import the new Footer component
 
 export default function LandingPage() {
   return (
@@ -14,6 +15,7 @@ export default function LandingPage() {
       <Features />
       <HowItWorks />
       <FinalCTA />
+      <Footer /> {/* Add the Footer component */}
     </main>
   );
 }
