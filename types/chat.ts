@@ -1,10 +1,11 @@
-import { Persona } from "../lib/prompts";
+import type { ModelMessage } from "ai"
+import type { Persona } from "../lib/prompts"
 
 export interface ChatRequest {
-  message: string;
-  persona: Persona;
+  messages: ModelMessage[]
+  persona: Persona
 }
 
 export interface ChatResponse {
-  reply: string;
+  messages: ModelMessage[]
 }

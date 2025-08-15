@@ -1,14 +1,9 @@
-import ChatWindow from "../../components/ChatWindow";
+import ChatWindow from "@/components/ChatWindow"
 
-export default function HomePage() {
+export default function Home() {
   return (
-    <div style={{ 
-      margin: 0, 
-      padding: 0,
-      minHeight: '100vh',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-    }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <ChatWindow />
     </div>
-  );
+  )
 }
