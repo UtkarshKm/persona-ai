@@ -7,7 +7,7 @@ const PersonaShowcase = () => {
         <h2 className="text-4xl font-bold text-center text-white mb-12">
           Meet the Personas
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-20 max-w-4xl mx-auto">
           <PersonaCard
             name="Hitesh Choudhary"
             imageSrc="/hitesh.webp"
