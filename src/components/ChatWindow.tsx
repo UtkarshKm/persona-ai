@@ -15,7 +15,7 @@ import type { ModelMessage } from 'ai'
 const personas = {
   hitesh: {
     name: "Hitesh Choudhary",
-    image: "/indian-tech-instructor-avatar.png",
+    image: "/hitesh.webp",
     theme: "blue",
     bgGradient: "from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20",
     accentColor: "bg-blue-500",
@@ -23,7 +23,7 @@ const personas = {
   },
   piyush: {
     name: "Piyush Garg",
-    image: "/young-indian-developer-avatar.png",
+    image: "/piyush.webp",
     theme: "green",
     bgGradient: "from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20",
     accentColor: "bg-green-500",

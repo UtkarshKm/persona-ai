@@ -14,13 +14,13 @@ interface PersonaSwitchProps {
 const personas = {
   hitesh: {
     name: "Hitesh Choudhary",
-    image: "/indian-tech-instructor-avatar.png",
+    image: "/hitesh.webp",
     shortName: "Hitesh",
     color: "bg-blue-500 hover:bg-blue-600",
   },
   piyush: {
     name: "Piyush Garg",
-    image: "/young-indian-developer-avatar.png",
+    image: "/piyush.webp",
     shortName: "Piyush",
     color: "bg-green-500 hover:bg-green-600",
   },
