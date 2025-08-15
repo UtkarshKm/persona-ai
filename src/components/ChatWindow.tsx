@@ -110,6 +110,7 @@ export default function ChatWindow() {
   }
 
   // Helper function to render message content
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderContent = (content: string | any[]): string => {
     if (typeof content === 'string') {
       return content
