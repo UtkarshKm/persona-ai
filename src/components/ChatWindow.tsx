@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Send, Loader2 } from "lucide-react"
+import { Send, Loader2, Copy, Check, ArrowDown } from "lucide-react"
 import PersonaSwitch from "./PersonaSwitch"
 import ThemeToggle from "@/components/ThemeToggle"
 import { cn } from "@/lib/utils"
@@ -38,8 +38,11 @@ export default function ChatWindow({ initialPersona }: { initialPersona: Persona
   const [loading, setLoading] = useState(false)
   const [persona, setPersona] = useState<Persona>(initialPersona)
   const [isTyping, setIsTyping] = useState(false)
+  const [copiedMessageId, setCopiedMessageId] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const chatMessagesRef = useRef<HTMLDivElement>(null); // New ref for scrollable div
   const inputRef = useRef<HTMLInputElement>(null)
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false); // New state
 
   const currentPersona = personas[persona]
 
@@ -57,6 +60,18 @@ export default function ChatWindow({ initialPersona }: { initialPersona: Persona
     setMessages([]) // Clear previous chat
     setInput('') // Clear input
   }
+
+  const handleScroll = () => {
+    if (chatMessagesRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = chatMessagesRef.current;
+      // Show button if not at the very bottom (with a small threshold)
+      setShowScrollToBottom(scrollHeight - scrollTop > clientHeight + 100);
+    }
+  };
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return
@@ -158,7 +173,11 @@ export default function ChatWindow({ initialPersona }: { initialPersona: Persona
         {/* Chat Messages */}
         <Card className="flex-1 mx-4 mb-4 p-4 shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500 delay-100">
           <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2 pl-2 pt-4">
+            <div
+              className="flex-1 overflow-y-auto space-y-4 pr-2 pl-2 pt-4 hide-scrollbar" // Added hide-scrollbar class
+              ref={chatMessagesRef} // Add a ref to the scrollable div
+              onScroll={handleScroll} // Add scroll event listener
+            >
               {messages.length === 0 && (
                 <div className="flex items-center justify-center h-full text-center animate-in fade-in duration-700 delay-300">
                   <div className="space-y-4">
@@ -204,15 +223,32 @@ export default function ChatWindow({ initialPersona }: { initialPersona: Persona
 
                   <div
                     className={cn(
-                      "max-w-[70%] rounded-2xl px-4 py-3 shadow-md transition-all duration-200 hover:shadow-lg transform-gpu", // Reduced max-w
+                      "max-w-[70%] rounded-2xl px-4 py-3 shadow-md transition-all duration-200 hover:shadow-lg transform-gpu relative group", // Added relative group for icon positioning
                       message.role === "user"
-                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white dark:from-blue-700 dark:to-blue-800 hover:from-blue-700 hover:to-blue-800" // Gradient for user messages
-                        : cn(currentPersona.messageColor, "hover:opacity-90 border border-transparent"), // Added border for assistant messages
+                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white dark:from-blue-700 dark:to-blue-800 hover:from-blue-700 hover:to-blue-800"
+                        : cn(currentPersona.messageColor, "hover:opacity-90 border border-transparent"),
                     )}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">
                       {renderContent(message.content)}
                     </p>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(renderContent(message.content));
+                        setCopiedMessageId(index); // Set the ID of the copied message
+                        setTimeout(() => {
+                          setCopiedMessageId(null); // Reset after a delay
+                        }, 1500);
+                      }}
+                      className="absolute top-1 right-1 p-1 rounded-full bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      title="Copy to clipboard"
+                    >
+                      {copiedMessageId === index ? (
+                        <Check className="h-3 w-3" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </button>
                   </div>
 
                   {message.role === "user" && (
@@ -305,6 +341,15 @@ export default function ChatWindow({ initialPersona }: { initialPersona: Persona
           </div>
         </Card>
       </div>
+      {showScrollToBottom && (
+        <Button
+          onClick={scrollToBottom}
+          className="absolute bottom-24 right-8 p-2 rounded-full shadow-lg bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300 animate-bounce"
+          size="icon"
+        >
+          <ArrowDown className="h-5 w-5" />
+        </Button>
+      )}
     </div>
   )
 }
